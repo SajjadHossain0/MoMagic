@@ -9,6 +9,7 @@ import com.momagicbd.Entities.ChargeFailure;
 import com.momagicbd.Entities.ChargeSuccess;
 import com.momagicbd.Entities.Inbox;
 import com.momagicbd.Repositories.*;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -24,10 +25,9 @@ public class InboxProcessingService {
     private final ChargeSuccessRepository chargeSuccessRepository;
     private final ChargeFailureRepository chargeFailureRepository;
 
-
     public InboxProcessingService(WebClient.Builder webClintBuilder, InboxRepository inboxRepository, KeywordDetailsRepository keywordDetailsRepository, ChargeConfigRepository chargeConfigRepository, ChargeSuccessRepository chargeSuccessRepository, ChargeFailureRepository chargeFailureRepository) {
         this.webClient = webClintBuilder
-                .baseUrl("http://demo.webmanza.com").build();
+                .baseUrl("http://demo.webmanza.com/a55dbz923ace647v/api/v1.0/services").build();
         this.inboxRepository = inboxRepository;
         this.keywordDetailsRepository = keywordDetailsRepository;
         this.chargeConfigRepository = chargeConfigRepository;
@@ -52,11 +52,10 @@ public class InboxProcessingService {
                 // retrive the unlock code
                 UnlockCodeResponse unlockCodeResponse = retrieveUnlockCode(inbox);
                 if (unlockCodeResponse == null || unlockCodeResponse.getStatusCode() != 200) {
-                    System.out.println("UnlockCodeResponse is null");
-
                     inbox.setStatus("F");
                     inboxRepository.save(inbox);
-                    System.out.println("unlock code : " + unlockCodeResponse.getStatusCode());
+                    System.out.println("Unlock code retrieval failed with status: " +
+                            (unlockCodeResponse == null ? "null response" : unlockCodeResponse.getStatusCode()));
                     continue;
                 }
 
@@ -82,42 +81,59 @@ public class InboxProcessingService {
 
 
     private UnlockCodeResponse retrieveUnlockCode(Inbox inbox) {
-        try{
+        UnlockCodeRequest requestPayload = new UnlockCodeRequest(inbox);
 
-             return webClient.post()
-                    .uri("/a55dbz923ace647v/api/v1.0/services/unlockCode")
-                    .bodyValue(new UnlockCodeRequest(inbox)).retrieve()
-                    .bodyToMono(UnlockCodeResponse.class).block();
+        // Validate payload
+        if (requestPayload.getTransactionId() == null || requestPayload.getKeyword() == null) {
+            throw new IllegalArgumentException("Missing required fields in UnlockCodeRequest");
+        }
+
+        // Log the payload details
+        System.out.println("Sending UnlockCodeRequest: " + requestPayload);
+
+        try {
+            // Make the API call
+            return webClient.post()
+                    .uri("/unlockCode")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestPayload)
+                    .retrieve()
+                    .bodyToMono(UnlockCodeResponse.class)
+                    .doOnSubscribe(subscription ->
+                            System.out.println("Request Headers: Content-Type=application/json"))
+                    .doOnSuccess(response ->
+                            System.out.println("Received UnlockCodeResponse: " + response))
+                    .block();
 
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            // Log the error with full details
+            System.err.println("Error during unlock code retrieval for payload: " + requestPayload);
+            e.printStackTrace();
+            return null;
         }
-
     }
 
+    private boolean performCharging(Inbox inbox, String unlockCode) {
+        ChargeConfig chargeConfig = chargeConfigRepository.findByOperator(inbox.getOperator());
 
-        private boolean performCharging(Inbox inbox, String unlockCode) {
-            ChargeConfig chargeConfig = chargeConfigRepository.findByOperator(inbox.getOperator());
-
-            if (chargeConfig == null) {
-                return false;
-            }
-
-            try{
-                ChargeResponse chargeResponse = webClient.post()
-                        .uri("/a55dbz923ace647v/api/v1.0/services/charge")
-                        .bodyValue(new ChargeRequest(inbox, chargeConfig.getChargeCode(), unlockCode))
-                        .retrieve()
-                        .bodyToMono(ChargeResponse.class).block();
-
-                return chargeResponse != null && chargeResponse.getStatusCode() == 200;
-
-            }catch (RuntimeException e){
-                e.printStackTrace();
-                return false;
-            }
+        if (chargeConfig == null) {
+            return false;
         }
 
+        try {
+            ChargeResponse chargeResponse = webClient.post()
+                    .uri("/charge")
+                    .bodyValue(new ChargeRequest(inbox, chargeConfig.getChargeCode(), unlockCode))
+                    .retrieve()
+                    .bodyToMono(ChargeResponse.class).block();
+
+            return chargeResponse != null && chargeResponse.getStatusCode() == 200;
+
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     private void chargeSuccessLog(Inbox inbox) {
         ChargeSuccess chargeSuccess = new ChargeSuccess(inbox);
@@ -129,6 +145,23 @@ public class InboxProcessingService {
         ChargeFailure chargeFailure = new ChargeFailure(inbox);
 
         chargeFailureRepository.save(chargeFailure);
+    }
+
+    @Bean
+    public WebClient webClientWithLogging(WebClient.Builder webClientBuilder) {
+        return webClientBuilder.filter((request, next) -> {
+            System.out.println("Outgoing Request: " + request.method() + " " + request.url());
+            request.headers().forEach((name, values) ->
+                    values.forEach(value -> System.out.println(name + ": " + value))
+            );
+
+            return next.exchange(request).doOnSuccess(response -> {
+                System.out.println("Response Status Code: " + response.statusCode());
+                response.headers().asHttpHeaders().forEach((name, values) ->
+                        values.forEach(value -> System.out.println(name + ": " + value))
+                );
+            });
+        }).build();
     }
 
 }

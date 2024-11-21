@@ -24,4 +24,17 @@ public class UnlockCodeRequest {
         this.keyword = inbox.getKeyword(); // Assume Inbox has this field
         this.gamename = inbox.getGameName(); // Assume Inbox has this field
     }
+
+    @Override
+    public String toString() {
+        return "UnlockCodeRequest{" +
+                "transactionId='" + transactionId + '\'' +
+                ", operator='" + operator + '\'' +
+                ", shortCode='" + shortCode + '\'' +
+                ", msisdn='" + msisdn + '\'' +
+                ", keyword='" + keyword + '\'' +
+                ", gamename='" + gamename + '\'' +
+                '}';
+    }
+
 }
