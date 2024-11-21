@@ -1,7 +1,10 @@
-package com.momagicbd.ContentRetrieval;
+package com.momagicbd.Services;
+import com.momagicbd.DTO.ApiResponse;
+import com.momagicbd.DTO.Contents;
+import com.momagicbd.Entities.Inbox;
+import com.momagicbd.Repositories.InboxRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,7 +25,7 @@ public class ContentService {
 
         try{
             ApiResponse apiResponse = webClient.get()
-                    .uri("/content").retrieve()
+                    .uri("/a55dbz923ace647v/api/v1.0/services/content").retrieve()
                     .bodyToMono(ApiResponse.class).block();
 
             if(apiResponse != null && apiResponse.getStatusCode() == 200){

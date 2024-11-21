@@ -1,4 +1,4 @@
-package com.momagicbd.ContentRetrieval;
+package com.momagicbd.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

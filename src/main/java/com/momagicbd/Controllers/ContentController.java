@@ -1,5 +1,6 @@
-package com.momagicbd.ContentRetrieval;
+package com.momagicbd.Controllers;
 
+import com.momagicbd.Services.ContentService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

@@ -1,4 +1,4 @@
-package com.momagicbd.ContentRetrieval;
+package com.momagicbd.DTO;
 
 import lombok.Getter;
 import lombok.Setter;

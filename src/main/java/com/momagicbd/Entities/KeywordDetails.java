@@ -1,11 +1,7 @@
-package com.momagicbd.ContentRetrieval;
+package com.momagicbd.Entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,31 +9,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "inbox")
-public class Inbox {
+@Table(name = "keyword_details")
+public class KeywordDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String transactionId;
-    private String operator;
-    private String shortCode;
-    private String msisdn;
+    @Column(nullable = false, unique = true)
     private String keyword;
-    private String gameName;
-
-    @Column(columnDefinition = "TEXT")
-    private String sms;
-
-    private String status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
 
     @PrePersist //set field whenever it is created
     public void prePersist() {

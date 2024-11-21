@@ -1,4 +1,4 @@
-package com.momagicbd.ConnectionCheck;
+package com.momagicbd.Services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
