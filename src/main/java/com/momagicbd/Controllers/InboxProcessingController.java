@@ -11,7 +11,7 @@ public class InboxProcessingController {
         this.inboxProcessingService = inboxProcessingService;
     }
 
-    @PostMapping("/inbox/process")
+    @PostMapping("/process-data")
     public String processInbox() {
         inboxProcessingService.processInbox();
         return "Inbox processing initiated";

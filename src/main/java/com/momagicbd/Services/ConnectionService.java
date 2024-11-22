@@ -14,8 +14,8 @@ public class ConnectionService {
                 .build();
     }
 
-    public String checkConnection() {
-        return this.webClient.get()
+    public void checkConnection() {
+        this.webClient.get()
                 .uri("/ping").retrieve()
                 .bodyToMono(String.class).block();
 

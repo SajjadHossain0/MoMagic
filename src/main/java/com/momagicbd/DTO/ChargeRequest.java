@@ -14,7 +14,7 @@ public class ChargeRequest {
     private String msisdn;
     private String chargeCode;
 
-    public ChargeRequest(Inbox inbox, String chargeCode, String unlockCode) {
+    public ChargeRequest(Inbox inbox, String chargeCode) {
         this.transactionId = inbox.getTransactionId();
         this.operator = inbox.getOperator();
         this.shortCode = inbox.getShortCode();

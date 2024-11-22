@@ -21,7 +21,7 @@ public class ContentService {
         this.inboxRepository = inboxRepository;
     }
 
-    public void contentRetrive(){
+    public void contentRetrieve(){
 
         try{
             ApiResponse apiResponse = webClient.get()
@@ -79,8 +79,8 @@ public class ContentService {
     /*public static void main(String[] args) {
         String sms = "MICROSOFT ALADDIN 00000000000000180001 29406 W27";
         ContentService service = new ContentService(null, null, null);
-        System.out.println("Keyword: " + service.extractKeyword(sms)); // Expected: MICROSOFT
-        System.out.println("Game Name: " + service.extractGameName(sms)); // Expected: ALADDIN
+        System.out.println("Keyword: " + service.extractKeyword(sms));
+        System.out.println("Game Name: " + service.extractGameName(sms));
     }*/
 
 

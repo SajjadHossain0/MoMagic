@@ -1,18 +1,11 @@
 package com.momagicbd.Services;
 
-import com.momagicbd.DTO.ChargeRequest;
-import com.momagicbd.DTO.ChargeResponse;
-import com.momagicbd.DTO.UnlockCodeRequest;
-import com.momagicbd.DTO.UnlockCodeResponse;
-import com.momagicbd.Entities.ChargeConfig;
-import com.momagicbd.Entities.ChargeFailure;
-import com.momagicbd.Entities.ChargeSuccess;
-import com.momagicbd.Entities.Inbox;
+import com.momagicbd.DTO.*;
+import com.momagicbd.Entities.*;
 import com.momagicbd.Repositories.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import java.util.List;
 
 @Service
@@ -24,7 +17,6 @@ public class InboxProcessingService {
     private final ChargeConfigRepository chargeConfigRepository;
     private final ChargeSuccessRepository chargeSuccessRepository;
     private final ChargeFailureRepository chargeFailureRepository;
-    private final ContentService contentService;
 
     public InboxProcessingService(WebClient.Builder webClintBuilder, InboxRepository inboxRepository, KeywordDetailsRepository keywordDetailsRepository, ChargeConfigRepository chargeConfigRepository, ChargeSuccessRepository chargeSuccessRepository, ChargeFailureRepository chargeFailureRepository, ContentService contentService) {
         this.webClient = webClintBuilder
@@ -34,7 +26,6 @@ public class InboxProcessingService {
         this.chargeConfigRepository = chargeConfigRepository;
         this.chargeSuccessRepository = chargeSuccessRepository;
         this.chargeFailureRepository = chargeFailureRepository;
-        this.contentService = contentService;
     }
 
     public void processInbox() {
@@ -51,7 +42,7 @@ public class InboxProcessingService {
                     continue;
                 }
 
-                // retrive the unlock code
+                // retrieve the unlock code
                 UnlockCodeResponse unlockCodeResponse = retrieveUnlockCode(inbox);
                 if (unlockCodeResponse == null || unlockCodeResponse.getStatusCode() != 200) {
                     inbox.setStatus("F");
@@ -62,7 +53,7 @@ public class InboxProcessingService {
                 }
 
                 // perform charging
-                boolean chargeSuccess = performCharging(inbox, unlockCodeResponse.getUnlockCode());
+                boolean chargeSuccess = performCharging(inbox);
                 if (chargeSuccess) {
                     chargeSuccessLog(inbox);
                     inbox.setStatus("S");
@@ -85,22 +76,21 @@ public class InboxProcessingService {
 
 
     private UnlockCodeResponse retrieveUnlockCode(Inbox inbox) {
-        UnlockCodeRequest requestPayload = new UnlockCodeRequest(inbox);
+        UnlockCodeRequest unlockCodeRequest = new UnlockCodeRequest(inbox);
 
-        // Validate payload
-        if (requestPayload.getTransactionId() == null || requestPayload.getKeyword() == null) {
+        // Validate unlockCodeRequest
+        if (unlockCodeRequest.getTransactionId() == null || unlockCodeRequest.getKeyword() == null) {
             throw new IllegalArgumentException("Missing required fields in UnlockCodeRequest");
         }
 
-        // Log the payload details
-        System.out.println("Sending UnlockCodeRequest: " + requestPayload);
+        // Log the unlockCodeRequest details
+        System.out.println("Sending UnlockCodeRequest: " + unlockCodeRequest);
 
         try {
-            // Make the API call
             return webClient.post()
                     .uri("/unlockCode")
                     .header("Content-Type", "application/json")
-                    .bodyValue(requestPayload)
+                    .bodyValue(unlockCodeRequest)
                     .retrieve()
                     .bodyToMono(UnlockCodeResponse.class)
                     .doOnSubscribe(subscription ->
@@ -110,14 +100,13 @@ public class InboxProcessingService {
                     .block();
 
         } catch (RuntimeException e) {
-            // Log the error with full details
-            System.err.println("Error during unlock code retrieval for payload: " + requestPayload);
+            System.err.println("Error during unlock code retrieval for payload: " + unlockCodeRequest);
             e.printStackTrace();
             return null;
         }
     }
 
-    private boolean performCharging(Inbox inbox, String unlockCode) {
+    private boolean performCharging(Inbox inbox) {
         ChargeConfig chargeConfig = chargeConfigRepository.findByOperator(inbox.getOperator());
 
         if (chargeConfig == null) {
@@ -127,7 +116,7 @@ public class InboxProcessingService {
         try {
             ChargeResponse chargeResponse = webClient.post()
                     .uri("/charge")
-                    .bodyValue(new ChargeRequest(inbox, chargeConfig.getChargeCode(), unlockCode))
+                    .bodyValue(new ChargeRequest(inbox, chargeConfig.getChargeCode()))
                     .retrieve()
                     .bodyToMono(ChargeResponse.class).block();
 

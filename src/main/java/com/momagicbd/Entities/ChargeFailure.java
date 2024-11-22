@@ -69,8 +69,6 @@ public class ChargeFailure {
         this.msisdn = inbox.getMsisdn();
         this.keyword = inbox.getKeyword();
         this.gameName = inbox.getGameName();
-        //this.statusCode = inbox.getStatusCode(); // Example: Map status code from Inbox
-        //this.message = inbox.getMessage(); // Example: Map message from Inbox
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

@@ -1,8 +1,7 @@
 package com.momagicbd.Controllers;
 
 import com.momagicbd.Services.ContentService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ContentController {
@@ -13,9 +12,9 @@ public class ContentController {
         this.contentService = contentService;
     }
 
-    @GetMapping("/retrive-content")
-    public String retriveContent() {
-        contentService.contentRetrive();
+    @GetMapping("/retrieve-content")
+    public String retrieveContent() {
+        contentService.contentRetrieve();
         return "Content retrieved and saved successfully";
     }
 }
