@@ -27,14 +27,23 @@ public class UnlockCodeRequest {
 
     @Override
     public String toString() {
-        return "UnlockCodeRequest\n{\n" +
+        /*return "UnlockCodeRequest\n{\n" +
                 "transactionId='" + transactionId + '\'' +
                 ", \noperator='" + operator + '\'' +
                 ", \nshortCode='" + shortCode + '\'' +
                 ", \nmsisdn='" + msisdn + '\'' +
                 ", \nkeyword='" + keyword + '\'' +
                 ", \ngamename='" + gamename + '\n' +
-                '}';
+                '}';*/
+        return "UnlockCodeRequest : \n" +
+                "{\n" +
+                "'transactionId': '"+transactionId+"',\n"+
+                "'operator': '"+operator+"',\n"+
+                "'shortCode': '"+shortCode+"',\n"+
+                "'msisdn': '"+msisdn+"',\n"+
+                "'keyword': '"+keyword+"',\n"+
+                "'gamename': '"+gamename+"',\n" +
+                "}";
     }
 
 }

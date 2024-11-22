@@ -1,9 +1,7 @@
 package com.momagicbd.Controllers;
 
 import com.momagicbd.Services.InboxProcessingService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class InboxProcessingController {
