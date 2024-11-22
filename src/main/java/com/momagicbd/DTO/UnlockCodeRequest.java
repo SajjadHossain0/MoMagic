@@ -13,28 +13,19 @@ public class UnlockCodeRequest {
     private String shortCode;
     private String msisdn;
     private String keyword;
-    private String gamename;
+    private String gameName;
 
-    // Constructor using Inbox object
     public UnlockCodeRequest(Inbox inbox) {
-        this.transactionId = java.util.UUID.randomUUID().toString(); // Generate a random transaction ID
-        this.operator = inbox.getOperator(); // Assume Inbox has this field
-        this.shortCode = inbox.getShortCode(); // Assume Inbox has this field
-        this.msisdn = inbox.getMsisdn(); // Assume Inbox has this field
-        this.keyword = inbox.getKeyword(); // Assume Inbox has this field
-        this.gamename = inbox.getGameName(); // Assume Inbox has this field
+        this.transactionId = inbox.getTransactionId();
+        this.operator = inbox.getOperator();
+        this.shortCode = inbox.getShortCode();
+        this.msisdn = inbox.getMsisdn();
+        this.keyword = inbox.getKeyword();
+        this.gameName = inbox.getGameName();
     }
 
     @Override
     public String toString() {
-        /*return "UnlockCodeRequest\n{\n" +
-                "transactionId='" + transactionId + '\'' +
-                ", \noperator='" + operator + '\'' +
-                ", \nshortCode='" + shortCode + '\'' +
-                ", \nmsisdn='" + msisdn + '\'' +
-                ", \nkeyword='" + keyword + '\'' +
-                ", \ngamename='" + gamename + '\n' +
-                '}';*/
         return "UnlockCodeRequest : \n" +
                 "{\n" +
                 "'transactionId': '"+transactionId+"',\n"+
@@ -42,7 +33,7 @@ public class UnlockCodeRequest {
                 "'shortCode': '"+shortCode+"',\n"+
                 "'msisdn': '"+msisdn+"',\n"+
                 "'keyword': '"+keyword+"',\n"+
-                "'gamename': '"+gamename+"',\n" +
+                "'gameName': '"+gameName+"',\n" +
                 "}";
     }
 

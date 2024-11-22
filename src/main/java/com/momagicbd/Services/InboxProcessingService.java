@@ -24,8 +24,9 @@ public class InboxProcessingService {
     private final ChargeConfigRepository chargeConfigRepository;
     private final ChargeSuccessRepository chargeSuccessRepository;
     private final ChargeFailureRepository chargeFailureRepository;
+    private final ContentService contentService;
 
-    public InboxProcessingService(WebClient.Builder webClintBuilder, InboxRepository inboxRepository, KeywordDetailsRepository keywordDetailsRepository, ChargeConfigRepository chargeConfigRepository, ChargeSuccessRepository chargeSuccessRepository, ChargeFailureRepository chargeFailureRepository) {
+    public InboxProcessingService(WebClient.Builder webClintBuilder, InboxRepository inboxRepository, KeywordDetailsRepository keywordDetailsRepository, ChargeConfigRepository chargeConfigRepository, ChargeSuccessRepository chargeSuccessRepository, ChargeFailureRepository chargeFailureRepository, ContentService contentService) {
         this.webClient = webClintBuilder
                 .baseUrl("http://demo.webmanza.com/a55dbz923ace647v/api/v1.0/services").build();
         this.inboxRepository = inboxRepository;
@@ -33,6 +34,7 @@ public class InboxProcessingService {
         this.chargeConfigRepository = chargeConfigRepository;
         this.chargeSuccessRepository = chargeSuccessRepository;
         this.chargeFailureRepository = chargeFailureRepository;
+        this.contentService = contentService;
     }
 
     public void processInbox() {
@@ -69,6 +71,8 @@ public class InboxProcessingService {
                     inbox.setStatus("F");
                 }
                 inboxRepository.save(inbox);
+
+
 
             } catch (Exception e) {
                 System.out.println("Exception while processing inbox ID: " + inbox.getId());
