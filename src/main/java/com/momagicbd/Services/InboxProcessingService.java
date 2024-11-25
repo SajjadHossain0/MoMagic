@@ -6,6 +6,9 @@ import com.momagicbd.Repositories.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -63,7 +66,9 @@ public class InboxProcessingService {
                 }
                 inboxRepository.save(inbox);
 
-
+                System.out.println("==========================================");
+                System.out.println("Charging complete!");
+                System.out.println("==========================================");
 
             } catch (Exception e) {
                 System.out.println("Exception while processing inbox ID: " + inbox.getId());
@@ -73,7 +78,6 @@ public class InboxProcessingService {
             }
         }
     }
-
 
     private UnlockCodeResponse retrieveUnlockCode(Inbox inbox) {
         UnlockCodeRequest unlockCodeRequest = new UnlockCodeRequest(inbox);
@@ -97,6 +101,7 @@ public class InboxProcessingService {
                             System.out.println("Request Headers: Content-Type=application/json"))
                     .doOnSuccess(response ->
                             System.out.println("Received UnlockCodeResponse: " + response))
+                    .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(5)))
                     .block();
 
         } catch (RuntimeException e) {
@@ -118,7 +123,9 @@ public class InboxProcessingService {
                     .uri("/charge")
                     .bodyValue(new ChargeRequest(inbox, chargeConfig.getChargeCode()))
                     .retrieve()
-                    .bodyToMono(ChargeResponse.class).block();
+                    .bodyToMono(ChargeResponse.class)
+                    .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(5)))
+                    .block();
 
             return chargeResponse != null && chargeResponse.getStatusCode() == 200;
 
@@ -156,5 +163,5 @@ public class InboxProcessingService {
             });
         }).build();
     }
-
+    
 }

@@ -5,7 +5,9 @@ import com.momagicbd.Entities.Inbox;
 import com.momagicbd.Repositories.InboxRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,7 +28,9 @@ public class ContentService {
         try{
             ApiResponse apiResponse = webClient.get()
                     .uri("/a55dbz923ace647v/api/v1.0/services/content").retrieve()
-                    .bodyToMono(ApiResponse.class).block();
+                    .bodyToMono(ApiResponse.class)
+                    .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(5)))
+                    .block();
 
             if(apiResponse != null && apiResponse.getStatusCode() == 200){
                 List<Contents> contents = apiResponse.getContents();
@@ -51,12 +55,16 @@ public class ContentService {
 
                     inboxRepository.save(inbox);
 
+
+
                 });
             }
             else {
                 throw new RuntimeException("Error retrieving content");
             }
-
+            System.out.println("==========================================");
+            System.out.println("Content retrieve and saved successfully!");
+            System.out.println("==========================================");
         }
         catch (Exception e){
             System.out.println("Error fetching content from API : " + e);

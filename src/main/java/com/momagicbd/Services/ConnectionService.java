@@ -2,6 +2,9 @@ package com.momagicbd.Services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
 
 @Service
 public class ConnectionService {
@@ -15,9 +18,20 @@ public class ConnectionService {
     }
 
     public void checkConnection() {
-        this.webClient.get()
-                .uri("/ping").retrieve()
-                .bodyToMono(String.class).block();
+        try {
+            this.webClient.get()
+                    .uri("/ping").retrieve()
+                    .bodyToMono(String.class)
+                    .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(5)))
+                    .block();
+            System.out.println("==========================================");
+            System.out.println("Connection created successfully!");
+            System.out.println("==========================================");
+        }
+        catch (Exception e) {
+            System.out.println("Failed to connect : " + e.getMessage());
+            throw new RuntimeException("Connection failed!",e);
+        }
 
     }
 }
